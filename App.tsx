@@ -1,117 +1,162 @@
-/**
- * Sample React Native App
- * https://github.com/facebook/react-native
- *
- * @format
- */
+import React, { useState } from 'react';
+import { NavigationContainer } from '@react-navigation/native';
+import { createStackNavigator } from '@react-navigation/stack';
+import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
+import { Image, View, Text, TouchableOpacity, StyleSheet, SafeAreaView } from 'react-native';
 
-import React from 'react';
-import type {PropsWithChildren} from 'react';
-import {
-  SafeAreaView,
-  ScrollView,
-  StatusBar,
-  StyleSheet,
-  Text,
-  useColorScheme,
-  View,
-} from 'react-native';
+// Import screens
+import Home from './Assets/Home';
+import Request from './Assets/Request'; 
+import Analysis from './Assets/Analysis'; 
+import Settings from './Assets/Settings'; 
+import Login from './Assets/Login';
 
-import {
-  Colors,
-  DebugInstructions,
-  Header,
-  LearnMoreLinks,
-  ReloadInstructions,
-} from 'react-native/Libraries/NewAppScreen';
+// Import local images
+const icons = {
+  home: require('./Assets/Images/home.png'),
+  request: require('./Assets/Images/request.png'),
+  analysis: require('./Assets/Images/analysis.png'),
+  settings: require('./Assets/Images/settings.png'),
+};
 
-type SectionProps = PropsWithChildren<{
-  title: string;
-}>;
+// Define Stack and Tab navigators
+const Stack = createStackNavigator();
+const Tab = createBottomTabNavigator();
 
-function Section({children, title}: SectionProps): React.JSX.Element {
-  const isDarkMode = useColorScheme() === 'dark';
-  return (
-    <View style={styles.sectionContainer}>
-      <Text
-        style={[
-          styles.sectionTitle,
-          {
-            color: isDarkMode ? Colors.white : Colors.black,
-          },
-        ]}>
-        {title}
-      </Text>
-      <Text
-        style={[
-          styles.sectionDescription,
-          {
-            color: isDarkMode ? Colors.light : Colors.dark,
-          },
-        ]}>
-        {children}
-      </Text>
-    </View>
+const App = () => {
+  const [userName, setUserName] = useState('User'); 
+
+  const CustomHeader = () => (
+    <SafeAreaView style={{ backgroundColor: '#f5f5f5' }}>
+      <View style={styles.headerContainer}>
+        <TouchableOpacity style={styles.headerLeft}>
+          <Image
+            source={require('./Assets/Images/profile.png')}
+            style={styles.profileIcon}
+            resizeMode="contain"
+          />
+        </TouchableOpacity>
+
+        <Text style={styles.headerTitle}>Welcome, {userName}!</Text>
+
+        <View style={styles.headerRight}>
+          <View style={styles.inOrOutCircle} />
+        </View>
+      </View>
+    </SafeAreaView>
   );
-}
 
-function App(): React.JSX.Element {
-  const isDarkMode = useColorScheme() === 'dark';
-
-  const backgroundStyle = {
-    backgroundColor: isDarkMode ? Colors.darker : Colors.lighter,
+  const TabNavigator = () => {
+    return (
+      <Tab.Navigator
+        screenOptions={({ route }) => ({
+          tabBarIcon: ({ color, size }) => {
+            let imageSource;
+            switch (route.name) {
+              case 'Home':
+                imageSource = icons.home;
+                break;
+              case 'Request':
+                imageSource = icons.request;
+                break;
+              case 'Analysis':
+                imageSource = icons.analysis;
+                break;
+              case 'Settings':
+                imageSource = icons.settings;
+                break;
+              default:
+                imageSource = icons.home;
+                break;
+            }
+            return (
+              <Image
+                source={imageSource}
+                style={{ width: size, height: size, tintColor: color }}
+                resizeMode="contain"
+              />
+            );
+          },
+          tabBarActiveTintColor: '#8B0000',
+          tabBarInactiveTintColor: 'gray',
+          tabBarStyle: { backgroundColor: '#F5F5F5' },
+          header: () => <CustomHeader />,
+        })}
+      >
+        <Tab.Screen name="Home">
+          {() => <Home setUserName={setUserName} />}
+        </Tab.Screen>
+        <Tab.Screen name="Request" component={Request} />
+        <Tab.Screen name="Analysis" component={Analysis} />
+        <Tab.Screen name="Settings" component={Settings} />
+      </Tab.Navigator>
+    );
   };
 
   return (
-    <SafeAreaView style={backgroundStyle}>
-      <StatusBar
-        barStyle={isDarkMode ? 'light-content' : 'dark-content'}
-        backgroundColor={backgroundStyle.backgroundColor}
-      />
-      <ScrollView
-        contentInsetAdjustmentBehavior="automatic"
-        style={backgroundStyle}>
-        <Header />
-        <View
-          style={{
-            backgroundColor: isDarkMode ? Colors.black : Colors.white,
-          }}>
-          <Section title="Step One">
-            Edit <Text style={styles.highlight}>App.tsx</Text> to change this
-            screen and then come back to see your edits.
-          </Section>
-          <Section title="See Your Changes">
-            <ReloadInstructions />
-          </Section>
-          <Section title="Debug">
-            <DebugInstructions />
-          </Section>
-          <Section title="Learn More">
-            Read the docs to discover what to do next:
-          </Section>
-          <LearnMoreLinks />
-        </View>
-      </ScrollView>
-    </SafeAreaView>
+    <NavigationContainer>
+      <Stack.Navigator>
+        <Stack.Screen
+          name="Login"
+          component={Login}
+          options={{ headerShown: false }}
+        />
+        <Stack.Screen
+          name="Main"
+          component={TabNavigator}
+          options={{ headerShown: false }}
+        />
+      </Stack.Navigator>
+    </NavigationContainer>
   );
-}
+};
 
 const styles = StyleSheet.create({
-  sectionContainer: {
-    marginTop: 32,
-    paddingHorizontal: 24,
+  headerContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingVertical: 15,
+    paddingHorizontal: 20,
+    backgroundColor: '#f5f5f5',
+    borderBottomWidth: 1,
+    borderBottomColor: '#ddd',
+    elevation: 2,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 1,
+    marginTop: 10,
   },
-  sectionTitle: {
-    fontSize: 24,
-    fontWeight: '600',
+  headerLeft: {
+    flex: 1,
+    alignItems: 'flex-start',
   },
-  sectionDescription: {
-    marginTop: 8,
+  headerRight: {
+    flex: 1,
+    alignItems: 'flex-end',
+  },
+  profileIcon: {
+    width: 30,
+    height: 30,
+  },
+  inOrOutCircle: {
+    width: 16,
+    height: 16,
+    borderRadius: 8,
+    backgroundColor: '#ff0000',
+    shadowColor: '#ff0000',
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 0.8,
+    shadowRadius: 4,
+    elevation: 5,
+  },
+  headerTitle: {
+    flex: 3,
     fontSize: 18,
-    fontWeight: '400',
-  },
-  highlight: {
-    fontWeight: '700',
+    fontWeight: '600',
+    color: '#075eec',
+    textAlign: 'center',
   },
 });
 
